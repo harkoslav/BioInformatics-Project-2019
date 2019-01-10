@@ -180,19 +180,19 @@ void  KmerUtil::globalAlignment(std::string &s, std::string &t, int refIndex){
         } 
     }
 
-    std::vector < std::pair<char, int> > mutations;
+    std::vector < std::tuple<char, int, char> > mutations;
     int realRefIndex = 0;
 
     for (int i = 0; i < alignmentRef.length(); i++){
             if (alignmentRef[i] == '-'){                    //insert
-                mutations.push_back(std::make_pair('I', refIndex+realRefIndex));
+                mutations.push_back(std::make_tuple('I', refIndex+realRefIndex, alignmentSeq[i]));
             } 
-            else if (alignmentSeq[i] == '-'){               //
-                mutations.push_back(std::make_pair('D', refIndex+realRefIndex));
+            else if (alignmentSeq[i] == '-'){               //delete
+                mutations.push_back(std::make_tuple('D', refIndex+realRefIndex, '-'));
                 realRefIndex++;
             }
             else if (alignmentRef[i] != alignmentSeq[i]){   //substitucija
-                mutations.push_back(std::make_pair('X', refIndex+realRefIndex));
+                mutations.push_back(std::make_tuple('X', refIndex+realRefIndex, alignmentSeq[i]));
                 realRefIndex++;
             } 
             else{
@@ -202,9 +202,9 @@ void  KmerUtil::globalAlignment(std::string &s, std::string &t, int refIndex){
     std::cout << alignmentRef << std::endl;
     std::cout << alignmentSeq << std::endl;
     for (int i = 0; i < mutations.size(); i++){
-        std::cout << mutations[i].first << " " << mutations[i].second << std::endl;
+        std::cout << std::get<0>(mutations[i]) << " " << std::get<1>(mutations[i]) << " "<< std::get<2>(mutations[i]) << std::endl;
     }
-    std::cout << alignmentSeq;
+    //std::cout << alignmentSeq;
 }
 
 std::tuple<std::string, std::string, int> KmerUtil::find_best_region(KmerIndexer &refIndexer, std::string &sequence, std::string &reference, int k, int w) {
