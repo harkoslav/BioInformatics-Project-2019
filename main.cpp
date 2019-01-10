@@ -21,8 +21,8 @@ int main(int argc, char *argv[])
     std::string reference = FastAReader::read_reference_file(reference_file);
     std::vector<std::string> sequence_list = FastAReader::read_sequence_file(sequence_file);
 
-    int k = 3;
-    int w = 4;
+    int k = 5;
+    int w = 15;
     int window_length = w + k - 1;
     
     std::vector <std::string> kmer_minimizers = KmerUtil::calculate_minimizers(reference, k, w);
@@ -68,5 +68,13 @@ int main(int argc, char *argv[])
 		std::cout << seq[result_subseq_indices[i]];
  
     std::cout << std::endl;
+
+
+    std::string x = "AATC";
+    std::string y = "AAC";
+    KmerUtil::globalAlignment(x,y);
+
+
     return 0;
+
 }
