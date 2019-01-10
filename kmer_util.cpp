@@ -1,11 +1,12 @@
 #include <kmer_util.hpp>
-
+#include <iostream>
+#include <algorithm>    // std::min
 
 std::vector<std::string> KmerUtil::calculate_minimizers(std::string reference, int k, int w) {
 
     std::vector<std::string> kmers;
     std::vector<std::string> kmer_minimizers;
-    std::string maxStr ("ZZZZ");
+    std::string maxStr ("ZZZZZ");
     std::string min = maxStr;
 
     for (int i=0,kmer_count=1; i<reference.length() - k + 1; i++){
@@ -63,4 +64,38 @@ void KmerUtil::LongestIncreasingSubsequence(std::vector<int> &a, std::vector<int
 	}
  
 	for (u = b.size(), v = b.back(); u--; v = p[v]) b[u] = v;
+}
+
+
+void  KmerUtil::globalAlignment(std::string &s, std::string &t){
+    int V[s.length()+1][t.length()+1];
+    V[0][0]= 0;
+    int d = -2;
+    
+    for (int i = 1; i <= s.length(); i++){
+            V[i][0] = d*i;
+    }
+    for (int j = 1; j <= t.length(); j++){
+        V[0][j] = d*j;
+    }
+    for ( int i = 1; i <= s.length();i++){
+        for( int j = 1; j <= t.length(); j++){
+                int MATCH = V[i-1][j-1] + W(s[i-1], t[j-1]);
+                int INSERTION = V[i][j-1] + d;
+                int DELETION = V[i-1][j] + d;
+                V[i][j] = std::max(std::max(MATCH, INSERTION), DELETION);
+                
+        }
+    }
+
+    // print matrix
+    for ( int i = 0; i <= s.length(); i ++){
+        for( int j= 0; j <= t.length(); j++){
+            std::cout << V[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+    
+
+
 }
