@@ -1,38 +1,54 @@
 #include <kmer_util.hpp>
 #include <iostream>
 #include <algorithm>    // std::min
+#include <unordered_map>
+#include <tuple>
+#include <Kmer.hpp>
+#include <iostream>
 
-std::vector<std::string> KmerUtil::calculate_minimizers(std::string reference, int k, int w) {
 
-    std::vector<std::string> kmers;
-    std::vector<std::string> kmer_minimizers;
-    std::string maxStr ("ZZZZZ");
-    std::string min = maxStr;
+Kmer KmerUtil::minimizer_in_window(std::string input, int k) {
+    std::string max_str ("ZZZZ");
+    Kmer minKmer(max_str, -1);
+    std::cout << "trazim u: " << input << std::endl;
+    for (int i=0,kmer_count=1; i < input.length() - k + 1; i++) {
 
-    for (int i=0,kmer_count=1; i<reference.length() - k + 1; i++){
-        std::string kmer = reference.substr(i, k);
+        Kmer kmer(input.substr(i, k), i);
 
-        if (kmer < min) {            
-            min = kmer;
+        if (kmer.str < minKmer.str) {
+            minKmer.str = kmer.str;
+            minKmer.index = i;
         }
-
-        //nadi min u novom windowu, pushaj trenutni min
-        if (kmer_count == w) {
-            kmer_count = 1;
-            kmer_minimizers.push_back(min);
-            min = maxStr;
-        } else {
-            kmer_count++;
-        }
-        
-        kmers.push_back(kmer);
     }
-    if (min != maxStr){
-        kmer_minimizers.push_back(min);
-    }
-
-    return kmer_minimizers;
+    return minKmer;
 }
+
+std::unordered_map<std::string, std::vector<int>> KmerUtil::calculate_minimizers(std::string reference, int k, int w) {
+
+    std::unordered_map<std::string, std::vector<int>> kmer_map;
+
+    int win_size = w + k - 1;
+
+    for (int i = 0; i <= reference.length() - win_size; i++) {
+            std::string sub = reference.substr(i, win_size);
+            Kmer minimizer = minimizer_in_window(sub, k);
+            //std::cout << "  nasao: " << minimizer.str << " i: " << minimizer.index<<  std::endl; 
+            auto iter = kmer_map.find(minimizer.str);
+            //not found
+            if(iter == kmer_map.end()) {
+               // std::cout << "      nema: " << minimizer.str << std::endl;
+                std::vector<int> kmer_indices = {i + minimizer.index};
+                kmer_map.insert(std::pair<std::string, std::vector<int>>(minimizer.str, kmer_indices));
+            } else {
+                if (iter->second.back() != (i + minimizer.index)){
+                    iter->second.push_back(i + minimizer.index);
+                }
+            }
+    }
+
+   return kmer_map;
+}
+
 
 void KmerUtil::LongestIncreasingSubsequence(std::vector<int> &a, std::vector<int> &b)
 {
@@ -43,10 +59,8 @@ void KmerUtil::LongestIncreasingSubsequence(std::vector<int> &a, std::vector<int
  
 	b.push_back(0);
  
-	for (size_t i = 1; i < a.size(); i++) 
-        {
-		if (a[b.back()] < a[i]) 
-                {
+	for (size_t i = 1; i < a.size(); i++){
+		if (a[b.back()] < a[i]) {
 			p[i] = b.back();
 			b.push_back(i);
 			continue;
