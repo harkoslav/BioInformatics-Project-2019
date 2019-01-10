@@ -14,7 +14,7 @@ KmerIndexer::KmerIndexer(std::string &input, int w_init, int k_init) {
 
 void KmerIndexer::generate_minimizers(std::string &input) {
    reference_map =  KmerUtil::calculate_minimizers(input, k, w);
-
+/* 
     for(auto el: reference_map) {
         std::cout << el.first << ": ";
 
@@ -23,7 +23,7 @@ void KmerIndexer::generate_minimizers(std::string &input) {
         }
         std::cout << std::endl;
     }
-
+ */
 }
 
 std::vector<int> KmerIndexer::get_kmer_indices(std::string &kmer){

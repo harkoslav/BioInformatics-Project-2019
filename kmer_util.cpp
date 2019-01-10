@@ -207,8 +207,8 @@ void  KmerUtil::globalAlignment(std::string &s, std::string &t, int refIndex){
     std::cout << alignmentSeq;
 }
 
-
-std::pair<std::string, std::string> KmerUtil::find_best_region(KmerIndexer &refIndexer, std::string &sequence, std::string &reference, int k, int w) {
+std::tuple<std::string, std::string, int> KmerUtil::find_best_region(KmerIndexer &refIndexer, std::string &sequence, std::string &reference, int k, int w) {
+//std::pair<std::string, std::string> KmerUtil::find_best_region(KmerIndexer &refIndexer, std::string &sequence, std::string &reference, int k, int w) {
 
     std::unordered_map<std::string, std::vector<int>> kmer_map;
     std::vector <std::pair<int, int>> seqi_refi_pairs;
@@ -217,7 +217,7 @@ std::pair<std::string, std::string> KmerUtil::find_best_region(KmerIndexer &refI
     for (int i = 0; i <= sequence.length() - win_size; i++) {
         std::string sub = sequence.substr(i, win_size);
         Kmer minimizer = minimizer_in_window(sub, k);
-        std::cout << "  nasao: " << minimizer.str << " i: " << i+minimizer.index<<  std::endl; 
+        //std::cout << "  nasao: " << minimizer.str << " i: " << i+minimizer.index<<  std::endl; 
         int minimizer_index_in_seq = i + minimizer.index;
         std::vector<int> ref_indices =  refIndexer.get_kmer_indices(minimizer.str);
 
@@ -226,7 +226,7 @@ std::pair<std::string, std::string> KmerUtil::find_best_region(KmerIndexer &refI
                     seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, ref_index));
                 }  
         } else { 
-            std::cout << seqi_refi_pairs.back().first << ": " << minimizer_index_in_seq << std::endl;
+            //std::cout << seqi_refi_pairs.back().first << ": " << minimizer_index_in_seq << std::endl;
             int last_inserted_index = seqi_refi_pairs.back().first;
         
             if (last_inserted_index != minimizer_index_in_seq) {
@@ -238,22 +238,22 @@ std::pair<std::string, std::string> KmerUtil::find_best_region(KmerIndexer &refI
     }
 
     std::cout << "Sequence string: " <<std::endl << sequence << std::endl;
-    for (auto el: seqi_refi_pairs) {
+    /* for (auto el: seqi_refi_pairs) {
         std::cout << "(" << el.first << ", " << el.second << ") ";
-    }
+    } */
     std::cout << std::endl;
     std::vector<int> longest_region_indices;
     
     LongestIncreasingSubsequence(seqi_refi_pairs, longest_region_indices);
 
-    std::cout << "LSI indices: " << std::endl;
+    /* std::cout << "LSI indices: " << std::endl;
     for (auto ind: longest_region_indices){
         std::cout << "( "  << seqi_refi_pairs[ind].first << ", " << seqi_refi_pairs[ind].second << " )"  << " ";
     }
-    std::cout <<std::endl;
+    std::cout <<std::endl; */
 
 
-    std::cout << "Region :" << std::endl;
+    
     
 
     int begin_ref = seqi_refi_pairs[longest_region_indices.front()].second;
@@ -261,13 +261,15 @@ std::pair<std::string, std::string> KmerUtil::find_best_region(KmerIndexer &refI
     int begin_seq = seqi_refi_pairs[longest_region_indices.front()].first;
     int end_seq = seqi_refi_pairs[longest_region_indices.back()].first;
 
-    std::cout << "Ref: ( "  << begin_ref << ", " << end_ref << " )"  << std::endl;
-    std::cout << "Seq: ( "  << begin_seq << ", " << end_seq << " )"  << std::endl;
+    std::cout << "Found regions of best match:" << std::endl;
+    std::cout << "Refrence str: ( begin_index: "  << begin_ref << ", end_index:" << end_ref + k << " )"  << std::endl;
+    std::cout << "Sequence str: ( begin_index: "  << begin_seq << ", end_index:" << end_seq + k << " )"  << std::endl;
 
-    std::string ref_substr = reference.substr(begin_ref, end_ref - begin_ref + k);
-    std::string seq_substr = sequence.substr(begin_seq, end_seq - begin_seq + k);
+    std::string ref_substr = reference.substr(begin_ref, end_ref - begin_ref + k + 1);
+    std::string seq_substr = sequence.substr(begin_seq, end_seq - begin_seq + k + 1);
 
-    return std::make_pair(ref_substr, seq_substr);
-    
-    
+    std::tuple<std::string, std::string, int> result (ref_substr, seq_substr, begin_ref);
+    return result; 
+    //return std::make_pair(ref_substr, seq_substr);
+ 
 }
