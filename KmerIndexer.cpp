@@ -6,7 +6,7 @@ KmerIndexer::KmerIndexer(std::string &input, int w_init, int k_init) {
     w = w_init;
     k = k_init;
     reference_length = input.length();
-
+    std::cout << "Creating minimizers for reference string: " << std::endl << input << std::endl;
     generate_minimizers(input);
 }
 

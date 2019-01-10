@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 
+#ifndef KMER_INDEXER
+#define KMER_INDEXER
 class KmerIndexer {
 
     std::unordered_map<std::string, std::vector<int>> reference_map;
@@ -16,6 +18,8 @@ class KmerIndexer {
         KmerIndexer(std::string &input, int w_init, int k_init);
         std::vector<int> get_kmer_indices(std::string &kmer);
         int get_reference_length();
+        
 
 };
 
+#endif
