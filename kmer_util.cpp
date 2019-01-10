@@ -112,5 +112,30 @@ void  KmerUtil::globalAlignment(std::string &s, std::string &t){
     }
     
 
+    std::string alignmentRef = "";
+    std::string alignmentSeq = "";
 
+    int i = s.length();
+    int j = t.length();
+
+    while (i>0 || j>0){
+        if (i > 0 && j > 0 && V[i][j] == V[i-1][j-1] + W(s[i-1], t[j-1])){
+            alignmentRef = s[i-1] + alignmentRef;
+            alignmentSeq = t[j-1] + alignmentSeq;
+            i -= 1;
+            j -= 1;
+        }
+        else if (i > 0 && V[i][j] == V[i-1][j] + d){
+            alignmentRef = s[i-1] + alignmentRef;
+            alignmentSeq = "-" + alignmentSeq;
+            i -=1;
+        }
+        else{
+            alignmentRef = "-" + alignmentRef;
+            alignmentSeq = t[j-1] + alignmentSeq;
+            j -=1;
+        }
+    }
+    std::cout << alignmentRef << std::endl;
+    std::cout << alignmentSeq;
 }
