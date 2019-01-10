@@ -81,11 +81,11 @@ void KmerUtil::LongestIncreasingSubsequence(std::vector<int> &a, std::vector<int
 }
 
 
- void KmerUtil::LongestIncreasingSubsequence(std::vector<std::pair<int, int>> &a, std::vector<int> &b) {
+ bool KmerUtil::LongestIncreasingSubsequence(std::vector<std::pair<int, int>> &a, std::vector<int> &b) {
 	std::vector<int> p(a.size());
 	int u, v;
  
-	if (a.empty()) return;
+	if (a.empty()) return false;
  
 	b.push_back(0);
  
@@ -108,6 +108,7 @@ void KmerUtil::LongestIncreasingSubsequence(std::vector<int> &a, std::vector<int
 	}
  
 	for (u = b.size(), v = b.back(); u--; v = p[v]) b[u] = v;
+    return true;
 } 
 
 int mapChar(char c){
@@ -126,7 +127,7 @@ int W(char first, char second){
     return w[mapChar(first)][mapChar(second)];
 }
 
-void  KmerUtil::globalAlignment(std::string &s, std::string &t, int refIndex){
+std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::string &s, std::string &t, int refIndex){
     int V[s.length()+1][t.length()+1];
     V[0][0]= 0;
     int d = -2;
@@ -148,12 +149,12 @@ void  KmerUtil::globalAlignment(std::string &s, std::string &t, int refIndex){
     }
 
     // print matrix
-    for ( int i = 0; i <= s.length(); i ++){
+    /* for ( int i = 0; i <= s.length(); i ++){
         for( int j= 0; j <= t.length(); j++){
             std::cout << V[i][j] << " ";
         }
         std::cout << std::endl;
-    }
+    } */
     
     std::string alignmentRef = "";
     std::string alignmentSeq = "";
@@ -199,11 +200,13 @@ void  KmerUtil::globalAlignment(std::string &s, std::string &t, int refIndex){
                 realRefIndex++;
             }  
     }
-    std::cout << alignmentRef << std::endl;
+    /* std::cout << alignmentRef << std::endl;
     std::cout << alignmentSeq << std::endl;
     for (int i = 0; i < mutations.size(); i++){
         std::cout << std::get<0>(mutations[i]) << " " << std::get<1>(mutations[i]) << " "<< std::get<2>(mutations[i]) << std::endl;
-    }
+    } */
+
+    return mutations;
     //std::cout << alignmentSeq;
 }
 
@@ -237,24 +240,32 @@ std::tuple<std::string, std::string, int> KmerUtil::find_best_region(KmerIndexer
         }
     }
 
-    std::cout << "Sequence string: " <<std::endl << sequence << std::endl;
+    //std::cout << "Sequence string: " <<std::endl << sequence << std::endl;
     /* for (auto el: seqi_refi_pairs) {
         std::cout << "(" << el.first << ", " << el.second << ") ";
     } */
-    std::cout << std::endl;
+    //std::cout << std::endl;
     std::vector<int> longest_region_indices;
     
-    LongestIncreasingSubsequence(seqi_refi_pairs, longest_region_indices);
+    bool success = LongestIncreasingSubsequence(seqi_refi_pairs, longest_region_indices);
 
-    /* std::cout << "LSI indices: " << std::endl;
-    for (auto ind: longest_region_indices){
-        std::cout << "( "  << seqi_refi_pairs[ind].first << ", " << seqi_refi_pairs[ind].second << " )"  << " ";
+
+    if (!success){
+        std::cout << "no common minimizers!!!!" <<std::endl;
+        return std::make_tuple("x","x",-1);
     }
-    std::cout <<std::endl; */
+
+    
+
+    //std::cout << "LSI indices: " << std::endl;
+   /*  for (auto ind: longest_region_indices){
+        //std::cout << "( "  << seqi_refi_pairs[ind].first << ", " << seqi_refi_pairs[ind].second << " )"  << " ";
+    } */
+    //std::cout <<std::endl;
 
 
     
-    
+  
 
     int begin_ref = seqi_refi_pairs[longest_region_indices.front()].second;
     int end_ref = seqi_refi_pairs[longest_region_indices.back()].second;
