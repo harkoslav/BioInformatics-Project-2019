@@ -96,7 +96,7 @@ int W(char first, char second){
     return w[mapChar(first)][mapChar(second)];
 }
 
-void  KmerUtil::globalAlignment(std::string &s, std::string &t){
+void  KmerUtil::globalAlignment(std::string &s, std::string &t, int refIndex){
     int V[s.length()+1][t.length()+1];
     V[0][0]= 0;
     int d = -2;
@@ -125,7 +125,6 @@ void  KmerUtil::globalAlignment(std::string &s, std::string &t){
         std::cout << std::endl;
     }
     
-
     std::string alignmentRef = "";
     std::string alignmentSeq = "";
 
@@ -148,8 +147,31 @@ void  KmerUtil::globalAlignment(std::string &s, std::string &t){
             alignmentRef = "-" + alignmentRef;
             alignmentSeq = t[j-1] + alignmentSeq;
             j -=1;
-        }
+        } 
+    }
+
+    std::vector < std::pair<char, int> > mutations;
+    int realRefIndex = 0;
+
+    for (int i = 0; i < alignmentRef.length(); i++){
+            if (alignmentRef[i] == '-'){                    //insert
+                mutations.push_back(std::make_pair('I', refIndex+realRefIndex));
+            } 
+            else if (alignmentSeq[i] == '-'){               //
+                mutations.push_back(std::make_pair('D', refIndex+realRefIndex));
+                realRefIndex++;
+            }
+            else if (alignmentRef[i] != alignmentSeq[i]){   //substitucija
+                mutations.push_back(std::make_pair('X', refIndex+realRefIndex));
+                realRefIndex++;
+            } 
+            else{
+                realRefIndex++;
+            }  
     }
     std::cout << alignmentRef << std::endl;
-    std::cout << alignmentSeq;
+    std::cout << alignmentSeq << std::endl;
+    for (int i = 0; i < mutations.size(); i++){
+        std::cout << mutations[i].first << " " << mutations[i].second << std::endl;
+    }
 }

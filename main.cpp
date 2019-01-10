@@ -66,9 +66,9 @@ int main(int argc, char *argv[])
     std::cout << std::endl;
 
 
-    std::string x = "AATC";
-    std::string y = "AAC";
-    KmerUtil::globalAlignment(x,y);
+    std::string s = "TCCAGAT";
+    std::string t = "ACTCCTGAT";
+    KmerUtil::globalAlignment(s,t, 1);
 
 
     return 0;
