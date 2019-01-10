@@ -66,6 +66,21 @@ void KmerUtil::LongestIncreasingSubsequence(std::vector<int> &a, std::vector<int
 	for (u = b.size(), v = b.back(); u--; v = p[v]) b[u] = v;
 }
 
+int mapChar(char c){
+    if (c == 'A') return 0;
+    else if (c == 'C') return 1;
+    else if (c == 'G') return 2;
+    else if (c == 'T') return 3;
+}
+int W(char first, char second){
+    int w[4][4] = {
+        {4, -1, -1, -1},
+        {-1, 4, -1, -1},
+        {-1, -1, 4, -1},
+        {-1, -1, -1, 4}
+    };
+    return w[mapChar(first)][mapChar(second)];
+}
 
 void  KmerUtil::globalAlignment(std::string &s, std::string &t){
     int V[s.length()+1][t.length()+1];
