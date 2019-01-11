@@ -24,11 +24,7 @@ int main(int argc, char *argv[])
 
     int k = 15;
     int w = 15;
-
-
-    
-    //ovako bi trebao ici cijeli algoritam
-    
+  
     std::ofstream csv_out;
     csv_out.open ("out.csv");
 
@@ -41,13 +37,17 @@ int main(int argc, char *argv[])
         std::string seq_substr = std::get<1>(reference_sequence_index);     // podstring pronadjen u sequenc genomu
         int ref_index = std::get<2>(reference_sequence_index);   
 
+
+        // if there is no common minimizer, continue
+        if (ref_index < 0) continue;
+
         std::vector < std::tuple<char, int, char> > res = KmerUtil::globalAlignment(ref_substr, seq_substr, ref_index);
         
 
         for (auto mutation : res) {
 
-            //if common minimizer, continue
-            if (std::get<2>(mutation) < 1) continue;
+            //todo: remove in future
+            if (std::get<2>(mutation) < 0) continue;
             
             csv_out << std::get<0>(mutation) << "," << std::get<1>(mutation) << "," << std::get<2>(mutation) << std::endl;
         }
@@ -73,7 +73,8 @@ int main(int argc, char *argv[])
 
     std::string ref = "TCCAGAT";
     std::string seq = "CTGAT";
-    std::vector < std::tuple<char, int, char> > outVector = KmerUtil::globalAlignment(ref, seq, 1);
+    std::vector < std::tuple<char, int, char> > outVector = KmerUtil::globalAlignment2(ref, seq, 1);
+
 
     std::ofstream csv_out;
     csv_out.open ("out.csv");

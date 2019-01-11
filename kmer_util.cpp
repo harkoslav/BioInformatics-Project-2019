@@ -128,8 +128,9 @@ int W(char first, char second){
 }
 
 std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::string &s, std::string &t, int refIndex){
-    int V[s.length()+1][t.length()+1];
-    V[0][0]= 0;
+
+    std::vector<std::vector<int>> V(s.length()+1, std::vector<int>(t.length()+1, 0));
+
     int d = -2;
     
     for (int i = 1; i <= s.length(); i++){
@@ -209,6 +210,7 @@ std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::strin
     return mutations;
     //std::cout << alignmentSeq;
 }
+
 
 std::tuple<std::string, std::string, int> KmerUtil::find_best_region(KmerIndexer &refIndexer, std::string &sequence, std::string &reference, int k, int w) {
 //std::pair<std::string, std::string> KmerUtil::find_best_region(KmerIndexer &refIndexer, std::string &sequence, std::string &reference, int k, int w) {
