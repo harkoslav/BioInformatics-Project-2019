@@ -14,7 +14,6 @@
 
 int main(int argc, char *argv[])
 {
-
     int k;
     int w;
 
@@ -25,7 +24,7 @@ int main(int argc, char *argv[])
         k = std::stoi(arg, &pos);
         w = std::stoi(arg2, &pos);
     } else {
-        k = 15;
+        k = 5;
         w = 15;
     }
 
@@ -37,26 +36,25 @@ int main(int argc, char *argv[])
     std::string reference = FastAReader::read_reference_file(reference_file);
     std::vector<std::string> sequence_list = FastAReader::read_sequence_file(sequence_file);
 
-  
-
-
-    
-
-
     /* std::ofstream csv_reg_test;    
     csv_reg_test.open ("reg.csv"); */
 
+    //std::string test("AATATCGTAGTATAA");
+    //KmerIndexer KmerIndex(test, w, k);
+    //reference = "AATATCGTAGTATAA";
+    //sequence_list.push_back("AACTATGTAGTA");
 
     std::unordered_map<int, std::unordered_map<char, std::unordered_map<char,int>>> ref_mutations;
     int seq_counter = 0;
     KmerIndexer KmerIndex(reference, w, k);
+
     for (auto seq_str: sequence_list) {
         seq_counter++;
     
         std::cout << "Seq num: " << seq_counter << std::endl;
         std::string seq_str_reversed = KmerUtil::to_reverse_complement(seq_str);
-        std::tuple<std::string, std::string, int, int> ref_seq_refstart_refend = KmerUtil::find_best_region(KmerIndex, seq_str, reference, w, k);
-        std::tuple<std::string, std::string, int, int> ref_seq_refstart_refend_comp = KmerUtil::find_best_region(KmerIndex, seq_str_reversed, reference, w, k);
+        std::tuple<std::string, std::string, int, int> ref_seq_refstart_refend = KmerUtil::find_best_region(KmerIndex, seq_str, reference, k, w);
+        std::tuple<std::string, std::string, int, int> ref_seq_refstart_refend_comp = KmerUtil::find_best_region(KmerIndex, seq_str_reversed, reference, k, w);
         
 
         int begin_ref = std::get<2>(ref_seq_refstart_refend);
@@ -113,7 +111,7 @@ int main(int argc, char *argv[])
         //if (seq_counter >= 10) break;
     
         
-
+        //break;
     }
 
     //csv_reg_test.close(); 
@@ -134,15 +132,6 @@ int main(int argc, char *argv[])
     
     
     //KmerUtil::print_results_to_csv(reference, ref_mutations); 
-
-
-
-
-
-
-
-
-
 
 
     /* std::string  indexes("012345678910");
@@ -204,5 +193,4 @@ int main(int argc, char *argv[])
     csv_out.close();  */
      
     return 0;
-
 }

@@ -86,10 +86,10 @@ std::string KmerUtil::to_reverse_complement(std::string input) {
 }
 
 Kmer KmerUtil::minimizer_in_window(std::string &input, int k) {
-    std::string max_str ("ZZZZZZZZZZZZZZZ");
+    std::string max_str ("ZZZZZZZZZZZZZZZZ");
     Kmer minKmer(max_str, -1);
   //  std::cout << "trazim u: " << input << std::endl;
-    for (int i=0,kmer_count=1; i < input.length() - k + 1; i++) {
+    for (int i=0; i < input.length() - k + 1; i++) {
 
         Kmer kmer(input.substr(i, k), i);
 
@@ -107,7 +107,7 @@ std::unordered_map<std::string, std::vector<int>> KmerUtil::calculate_minimizers
 
     int win_size = w + k - 1;
 
-    for (int i = 0; i <= reference.length() - win_size; i++) {
+    for (int i = 0; i <= reference.length() - win_size; i += w) {
             std::string sub = reference.substr(i, win_size);
             Kmer minimizer = minimizer_in_window(sub, k);
             //std::cout << "  nasao: " << minimizer.str << " i: " << minimizer.index<<  std::endl; 
@@ -297,11 +297,11 @@ std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::strin
             }  
     }
 
-    std::cout << alignmentRef << std::endl;
-    std::cout << alignmentSeq << std::endl; 
-     for (int i = 0; i < mutations.size(); i++){
-        std::cout << std::get<0>(mutations[i]) << " " << std::get<1>(mutations[i]) << " "<< std::get<2>(mutations[i]) << std::endl;
-    }
+    //std::cout << alignmentRef << std::endl;
+    //std::cout << alignmentSeq << std::endl; 
+    //for (int i = 0; i < mutations.size(); i++){
+    //    std::cout << std::get<0>(mutations[i]) << " " << std::get<1>(mutations[i]) << " "<< std::get<2>(mutations[i]) << std::endl;
+    //}
  
     return mutations;
     //std::cout << alignmentSeq;
@@ -315,7 +315,7 @@ std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIn
     std::vector <std::pair<int, int>> seqi_refi_pairs;
     int win_size = w + k - 1;
 
-    for (int i = 0; i <= sequence.length() - win_size; i++) {
+    for (int i = 0; i <= sequence.length() - win_size; i += w) {
         std::string sub = sequence.substr(i, win_size);
         Kmer minimizer = minimizer_in_window(sub, k);
         //std::cout << "  nasao seq minimizer: " << minimizer.str << " i: " << i+minimizer.index<<  std::endl; 

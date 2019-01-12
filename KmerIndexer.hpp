@@ -11,10 +11,11 @@ class KmerIndexer {
     int k;
     int reference_length;
 
-    private:
-        void generate_minimizers(std::string &input);
+   // private:
+     //   void generate_minimizers(std::string &input);
 
     public: 
+        void generate_minimizers(std::string &input);
         KmerIndexer(std::string &input, int w_init, int k_init);
         std::vector<int> get_kmer_indices(std::string &kmer);
         int get_reference_length();
