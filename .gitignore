@@ -2,3 +2,4 @@
 main.o 
 ecoli_simulated_reads.fasta
 out.csv
+reg.csv

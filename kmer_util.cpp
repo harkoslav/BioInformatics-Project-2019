@@ -32,7 +32,7 @@ KmerUtil::IndexToBase KmerUtil::index_to_base = {
 }; 
 
 
-std::pair<char,char> KmerUtil::get_max_mutation_on_index(std::unordered_map <char, std::unordered_map<char, int>> map) {
+std::tuple<char,char, int> KmerUtil::get_max_mutation_on_index(std::unordered_map <char, std::unordered_map<char, int>> map) {
     
     int max = -1;
     char base;
@@ -46,8 +46,7 @@ std::pair<char,char> KmerUtil::get_max_mutation_on_index(std::unordered_map <cha
             }
         }
     }
-
-    return std::make_pair(action, base);
+    return std::make_tuple(action, base, max);
 }
 void KmerUtil::print_results_to_csv(std::string ref_string,  std::unordered_map<int, std::unordered_map<char, std::unordered_map<char,int>>> mutations_map, std::ofstream csv_out) {
     //std::ofstream csv_out;
@@ -55,8 +54,9 @@ void KmerUtil::print_results_to_csv(std::string ref_string,  std::unordered_map<
     for (int i = 0; i < ref_string.size(); i++) {
         auto it =  mutations_map.find(i);
         if(it != mutations_map.end()) {
-            std::pair<char,char> action_mutation = get_max_mutation_on_index(it->second);
-            csv_out << action_mutation.first << "," << i << "," << action_mutation.second << std::endl;
+           // std::pair<char,char> action_mutation = get_max_mutation_on_index(it->second);
+           // csv_out << action_mutation.first << "," << i << "," << action_mutation.second << ","  << std::endl;
+
         }
     }
     csv_out.close(); 
@@ -107,7 +107,7 @@ std::unordered_map<std::string, std::vector<int>> KmerUtil::calculate_minimizers
 
     int win_size = w + k - 1;
 
-    for (int i = 0; i <= reference.length() - win_size; i += w) {
+    for (int i = 0; i <= reference.length() - win_size; i++) {
             std::string sub = reference.substr(i, win_size);
             Kmer minimizer = minimizer_in_window(sub, k);
             //std::cout << "  nasao: " << minimizer.str << " i: " << minimizer.index<<  std::endl; 
@@ -218,6 +218,8 @@ std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::strin
         V[0][j] = d*j;
         //V[0][j] = 0;
     }
+
+    //#pragma omp parallel for collapse(2)
     for ( int i = 1; i <= s.length();i++){
         for( int j = 1; j <= t.length(); j++){
                 int MATCH = V[i-1][j-1] + W(s[i-1], t[j-1]);
@@ -315,7 +317,7 @@ std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIn
     std::vector <std::pair<int, int>> seqi_refi_pairs;
     int win_size = w + k - 1;
 
-    for (int i = 0; i <= sequence.length() - win_size; i += w) {
+    for (int i = 0; i <= sequence.length() - win_size; i++) {
         std::string sub = sequence.substr(i, win_size);
         Kmer minimizer = minimizer_in_window(sub, k);
         //std::cout << "  nasao seq minimizer: " << minimizer.str << " i: " << i+minimizer.index<<  std::endl; 
@@ -326,7 +328,9 @@ std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIn
         int first_ref_ind;        
         if (seqi_refi_pairs.empty() && !ref_indices.empty()) {
             
-            first_ref_ind = ref_indices.front();
+            //first_ref_ind = ref_indices.front();
+
+            first_ref_ind = ref_indices.back();
             seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, first_ref_ind));
 
 
@@ -339,8 +343,9 @@ std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIn
         } else if(!ref_indices.empty()){ 
             //std::cout << seqi_refi_pairs.back().first << ": " << minimizer_index_in_seq << std::endl;
             int last_inserted_index = seqi_refi_pairs.back().first;
-            first_ref_ind = ref_indices.front();
-
+            
+            //first_ref_ind = ref_indices.front();
+            first_ref_ind = ref_indices.back();
             if (last_inserted_index != minimizer_index_in_seq) {
                 
                 seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, first_ref_ind));

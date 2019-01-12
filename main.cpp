@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
             ref_mutations[mutation_index_in_ref][base][I_X_D]++;
         }
 
-        //if (seq_counter >= 10) break;
+        if (seq_counter >= 250) break;
     
         
         //break;
@@ -119,13 +119,17 @@ int main(int argc, char *argv[])
 
     // should be KmerUtil::print_results_to_csv
     std::ofstream csv_out;
-    csv_out.open ("outt_test.csv");
+    csv_out.open ("out.csv");
 
     for (int i = 0; i < reference.size(); i++) {
         auto it =  ref_mutations.find(i);
         if(it != ref_mutations.end()) {
-            std::pair<char,char> action_mutation = KmerUtil::get_max_mutation_on_index(it->second);
-            csv_out << action_mutation.first << "," << i << "," << action_mutation.second << std::endl;
+            std::tuple<char,char, int> action_mutation = KmerUtil::get_max_mutation_on_index(it->second);
+            int count_tres = std::get<2>(action_mutation);
+            if( count_tres >= 10){
+                //csv_out << std::get<0>(action_mutation) << "," << i << "," << std::get<1>(action_mutation) << "," << std::get<2>(action_mutation) << std::endl;
+                csv_out << std::get<0>(action_mutation) << "," << i << "," << std::get<1>(action_mutation) << "," << std::get<2>(action_mutation) << std::endl;
+            }
         }
     }
     csv_out.close(); 

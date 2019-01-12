@@ -1,0 +1,13 @@
+0.14953271028 - 30 sekvenci, front, i+=w, count_tres > 2
+0.14953271028  - 30 sekvenci, back, i+=w, count_tres > 2
+0.171965317919 - 50 sekvenci, back,  i+=w, count_tres > 2
+0.171965317919 - 50 sekvenci, front, i+=w, count_tres > 2
+0.171469740634 - 50 sekvenci, front , i++, count_tres > 2
+0.171469740634 - 50 sekvenci, back, i++,   count_tres > 2
+0.0412844036697 - 30 sekvenci, back, i++, count_tres > 3
+0.305369127517 - 50 sekvenci, back, i++, count_tres > 3
+0.109682299546 - 100 sekvenci, back, i++, count_tres >3
+0.228346456693 - 110 sekvenci, back, i++, count_tres >4
+
+0.450980392157 - sve, back, i++, count_tres >=10
+
