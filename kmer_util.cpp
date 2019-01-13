@@ -328,16 +328,6 @@ int findArgMax(std::vector<int> first, std::vector<int> second) {
 std::unordered_map <std::string, std::pair<std::string,std::string> > memo;
 
 std::pair<std::string, std::string> hirschberg(std::string &x, std::string &y){
-   // std::cout << x << std::endl;
-   // std::cout << y << std::endl;
-      
-   if (memo.find(x+y) != memo.end()) {
-       return memo.find(x+y)->second;
-   }else if(memo.find(y+x) !=memo.end()){
-        std::pair<std::string, std::string> result = memo.find(y+x)->second;
-        return std::make_pair(result.second, result.first);
-   }
-
 
     std::string alignmentRef = "";
     std::string alignmentSeq = "";
@@ -348,14 +338,13 @@ std::pair<std::string, std::string> hirschberg(std::string &x, std::string &y){
             alignmentSeq = alignmentSeq +  y[i-1];
         }
 
-       // std::cout << "X duljine 0 " << alignmentRef << " " << alignmentSeq << std::endl;
     }
     else if (y.length() == 0){
         for (int i = 1; i <= x.length(); i++){
             alignmentRef = alignmentRef + x[i-1];
             alignmentSeq = alignmentSeq +  '-';
         }
-        //std::cout << "Z duljine 0 " << alignmentRef << " " << alignmentSeq << std::endl;
+
     } 
     else if (x.length() == 1 || y.length() == 1){
         std::pair<std::string, std::string> nwPair = needlemanWunsch(x, y); // calling NeedlemanWunsch() 
@@ -422,10 +411,7 @@ std::pair<std::string, std::string> hirschberg(std::string &x, std::string &y){
 
     std::pair<std::string, std::string> result = std::make_pair(alignmentRef, alignmentSeq);
     std::pair<std::string, std::string> result2 = std::make_pair(alignmentSeq, alignmentRef);
-
-    memo.insert(std::pair<std::string, std::pair<std::string, std::string> > (x + y, result));
-    memo.insert(std::pair<std::string, std::pair<std::string, std::string> > (y + x, result2));
-    
+  
     return result;
 }
 
