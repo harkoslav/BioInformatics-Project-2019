@@ -16,33 +16,34 @@ int main(int argc, char *argv[])
 {
     int k;
     int w;
+    int c_treshold;
 
-    if (argc >= 2) {
+    if (argc >= 3) {
         std::size_t pos;
         std::string arg = argv[1];
         std::string arg2 = argv[2];
+        std::string arg3 = argv[3];
         k = std::stoi(arg, &pos);
         w = std::stoi(arg2, &pos);
+        c_treshold = std::stoi(arg3, &pos);
     } else {
         k = 5;
         w = 15;
+        c_treshold = 13;
     }
 
     std::cout << "k: " << k << " w: " << w << std::endl;
-    //std::string reference_file ("./input/lambda.fasta");
-    std::string sequence_file ("./input/lambda_simulated_reads.fasta");
-    std::string reference_file ("./input/lambda.fasta");
     
+    /* std::string sequence_file ("./input/lambda_simulated_reads.fasta");
+    std::string reference_file ("./input/lambda.fasta"); */
+
+    std::string sequence_file ("./input/ecoli_simulated_reads.fasta");
+    std::string reference_file ("./input/ecoli.fasta");
+
     std::string reference = FastAReader::read_reference_file(reference_file);
     std::vector<std::string> sequence_list = FastAReader::read_sequence_file(sequence_file);
 
-    /* std::ofstream csv_reg_test;    
-    csv_reg_test.open ("reg.csv"); */
-
-    //std::string test("AATATCGTAGTATAA");
-    //KmerIndexer KmerIndex(test, w, k);
-    //reference = "AATATCGTAGTATAA";
-    //sequence_list.push_back("AACTATGTAGTA");
+    
 
     std::unordered_map<int, std::unordered_map<char, std::unordered_map<char,int>>> ref_mutations;
     int seq_counter = 0;
@@ -108,7 +109,7 @@ int main(int argc, char *argv[])
             ref_mutations[mutation_index_in_ref][base][I_X_D]++;
         }
 
-        if (seq_counter >= 250) break;
+       // if (seq_counter >= 2000) break;
     
         
         //break;
@@ -126,9 +127,10 @@ int main(int argc, char *argv[])
         if(it != ref_mutations.end()) {
             std::tuple<char,char, int> action_mutation = KmerUtil::get_max_mutation_on_index(it->second);
             int count_tres = std::get<2>(action_mutation);
-            if( count_tres >= 10){
-                //csv_out << std::get<0>(action_mutation) << "," << i << "," << std::get<1>(action_mutation) << "," << std::get<2>(action_mutation) << std::endl;
+            char action = std::get<0>(action_mutation);
+            if( count_tres >= c_treshold){
                 csv_out << std::get<0>(action_mutation) << "," << i << "," << std::get<1>(action_mutation) << "," << std::get<2>(action_mutation) << std::endl;
+                //csv_out << std::get<0>(action_mutation) << "," << i << "," << std::get<1>(action_mutation) << std::endl;
             }
         }
     }

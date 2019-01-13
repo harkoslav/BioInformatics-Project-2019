@@ -3,3 +3,4 @@ main.o
 ecoli_simulated_reads.fasta
 out.csv
 reg.csv
+ecoli_mutated.csv

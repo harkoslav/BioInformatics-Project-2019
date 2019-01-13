@@ -107,7 +107,7 @@ std::unordered_map<std::string, std::vector<int>> KmerUtil::calculate_minimizers
 
     int win_size = w + k - 1;
 
-    for (int i = 0; i <= reference.length() - win_size; i++) {
+    for (int i = 0; i <= reference.length() - win_size; i += w) {
             std::string sub = reference.substr(i, win_size);
             Kmer minimizer = minimizer_in_window(sub, k);
             //std::cout << "  nasao: " << minimizer.str << " i: " << minimizer.index<<  std::endl; 
@@ -207,6 +207,7 @@ int W(char first, char second){
 
 std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::string &s, std::string &t, int refIndex){
 
+    
     std::vector<std::vector<int>> V(s.length()+1, std::vector<int>(t.length()+1, 0));
 
     int d = -2;
@@ -219,9 +220,12 @@ std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::strin
         //V[0][j] = 0;
     }
 
-    //#pragma omp parallel for collapse(2)
-    for ( int i = 1; i <= s.length();i++){
-        for( int j = 1; j <= t.length(); j++){
+   
+    
+    //#pragma omp for
+    for (int i = 1; i <= s.length();i++){
+        #pragma omp parallel for
+        for(int j = 1; j <= t.length(); j++){
                 int MATCH = V[i-1][j-1] + W(s[i-1], t[j-1]);
                 int INSERTION = V[i][j-1] + d;
                 int DELETION = V[i-1][j] + d;
@@ -229,6 +233,8 @@ std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::strin
                 
         }
     }
+
+    
 
     // print matrix
     /* for ( int i = 0; i <= s.length(); i ++){
@@ -243,23 +249,7 @@ std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::strin
 
     int i = s.length();
     int j = t.length();
-    
-   /*  std::cout << "JJJJJJJJJJJJJJJJJJ: " << j << std::endl;
-
-    int max = d*i;
-    int temp;
-
-    for (int x = j; j >= 0; j--){
-        if(V[i][j] > max){
-            max = V[i][j];
-            temp = j;
-        }
-    }
-
-    j = temp;
-
-    std::cout << "JJJJJJJJJJJJJJJJJJXXXXXXXX: " << j << std::endl;
-     */
+        
     while (i>0 || j>0){
         if (i > 0 && j > 0 && V[i][j] == V[i-1][j-1] + W(s[i-1], t[j-1])){
             alignmentRef = s[i-1] + alignmentRef;
@@ -317,7 +307,7 @@ std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIn
     std::vector <std::pair<int, int>> seqi_refi_pairs;
     int win_size = w + k - 1;
 
-    for (int i = 0; i <= sequence.length() - win_size; i++) {
+    for (int i = 0; i <= sequence.length() - win_size; i += w) {
         std::string sub = sequence.substr(i, win_size);
         Kmer minimizer = minimizer_in_window(sub, k);
         //std::cout << "  nasao seq minimizer: " << minimizer.str << " i: " << i+minimizer.index<<  std::endl; 
@@ -331,15 +321,11 @@ std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIn
             //first_ref_ind = ref_indices.front();
 
             first_ref_ind = ref_indices.back();
-            seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, first_ref_ind));
-
-
-
-            //test: skroz lijevi dio ref stringa
-            //seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, last_ref_ind));
-            /* for (auto ref_index: ref_indices) {    
+            //seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, first_ref_ind));
+            
+            for (auto ref_index: ref_indices) {    
                     seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, ref_index));
-            }   */
+            }  
         } else if(!ref_indices.empty()){ 
             //std::cout << seqi_refi_pairs.back().first << ": " << minimizer_index_in_seq << std::endl;
             int last_inserted_index = seqi_refi_pairs.back().first;
@@ -348,18 +334,14 @@ std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIn
             first_ref_ind = ref_indices.back();
             if (last_inserted_index != minimizer_index_in_seq) {
                 
-                seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, first_ref_ind));
-                
-                //test: skroz lijevi dio ref stringa
-                //seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, last_ref_ind));
-              /*   for (auto ref_index: ref_indices) {          
+                //seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, first_ref_ind));
+                                
+                  for (auto ref_index: ref_indices) {          
                     seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, ref_index));
-                }       */
+                }     
             }
         }
     }
-
-    //std::cout << "Sequence string: " <<std::endl << sequence << std::endl;
 
     /* std::cout << "All pairs: " << std::endl;
     for (auto el: seqi_refi_pairs) {
@@ -370,21 +352,59 @@ std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIn
     
     bool success = LongestIncreasingSubsequence(seqi_refi_pairs, longest_region_indices);
 
+    
+    
+
+                    //todo test
+
+
+    std::vector<std::pair<int,int>> lsi_filtered;
+    //ili u mapu
+    int init = 1;
+    int last_pushed;
+    for (int i: longest_region_indices) {
+            //std::cout << last_pushed << " " <<  seqi_refi_pairs[i].first << std::endl;
+        if (init || last_pushed != seqi_refi_pairs[i].first){
+            init = 0;
+            lsi_filtered.push_back(seqi_refi_pairs[i]);
+            last_pushed = seqi_refi_pairs[i].first;
+            //std::cout << "aaa" <<std::endl;
+        }
+    }
+
+
+    seqi_refi_pairs = lsi_filtered;
+    
+    int seq_len = sequence.length();
+    //check if there is too big gap
+    int max_gap = -1;
+    int before_curr = -1;
+    for (auto ind: longest_region_indices){
+        if (before_curr < 0) {
+            before_curr = seqi_refi_pairs[ind].second;
+            continue;
+        }
+        int curr = seqi_refi_pairs[ind].second;
+
+        if ( curr - before_curr > 15*(w+k-1) ){
+            std::cout << "TOO big gap: " << curr - before_curr << std::endl;
+            success = false;
+            break;
+        }
+        before_curr = curr;
+    }
 
     if (!success){
-        //std::cout << "no common minimizers!!!!" <<std::endl;
         return std::make_tuple("x","x",-1, -1);
     }
 
-  
-    
-/* 
-    std::cout << "LSI indices: " << std::endl;
+   
+    /* std::cout << "LSI indices: " << std::endl;
     for (auto ind: longest_region_indices){
         std::cout << "( "  << seqi_refi_pairs[ind].first << ", " << seqi_refi_pairs[ind].second << " )"  << " ";
     }
-    std::cout <<std::endl; */
-
+    std::cout <<std::endl;
+ */
 
     
     std::ofstream csv_reg_test;
@@ -406,7 +426,7 @@ std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIn
     csv_reg_test << "Refrence str: ( begin_index: "  << begin_ref << " end_index:" << end_str_ref_index << " )"  << std::endl;
     csv_reg_test << "Sequence str: ( begin_index: "  << begin_seq << " end_index:" << end_str_seq_index << " )"  << std::endl;
      
-
+    
     
     std::string ref_substr = reference.substr(begin_ref, end_str_ref_index - begin_ref + 1);
     std::string seq_substr = sequence.substr(begin_seq, end_str_seq_index - begin_seq + 1);
@@ -416,6 +436,5 @@ std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIn
     std::tuple<std::string, std::string, int, int> result (ref_substr, seq_substr, begin_ref, end_str_ref_index);
 
     return result; 
-    //return std::make_pair(ref_substr, seq_substr);
  
 }
