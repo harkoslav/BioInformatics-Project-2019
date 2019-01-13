@@ -6,6 +6,9 @@
 #include <Kmer.hpp>
 #include <iostream>
 #include <fstream>
+#include <string.h>
+#include <vector>
+#include <map>
 
 
 KmerUtil::ComplementMap KmerUtil::complement_map = { 
@@ -189,6 +192,7 @@ void KmerUtil::LongestIncreasingSubsequence(std::vector<int> &a, std::vector<int
     return true;
 } 
 
+
 int mapChar(char c){
     if (c == 'A') return 0;
     else if (c == 'C') return 1;
@@ -197,39 +201,37 @@ int mapChar(char c){
 }
 int W(char first, char second){
     int w[4][4] = {
-        {4, -1, -1, -1},
-        {-1, 4, -1, -1},
-        {-1, -1, 4, -1},
-        {-1, -1, -1, 4}
+        {2, -1, -1, -1},
+        {-1, 2, -1, -1},
+        {-1, -1, 2, -1},
+        {-1, -1, -1, 2}
     };
     return w[mapChar(first)][mapChar(second)];
 }
 
-std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::string &s, std::string &t, int refIndex){
+// x = reference, y = sequence
+std::pair <std::string, std::string> needlemanWunsch(std::string &x, std::string &y){
 
-    std::vector<std::vector<int>> V(s.length()+1, std::vector<int>(t.length()+1, 0));
+    std::vector<std::vector<int>> V(x.length()+1, std::vector<int>(y.length()+1, 0));
 
     int d = -2;
     
-    for (int i = 1; i <= s.length(); i++){
+    for (int i = 1; i <= x.length(); i++){
             V[i][0] = d*i;
     }
-    for (int j = 1; j <= t.length(); j++){
+    for (int j = 1; j <= y.length(); j++){
         V[0][j] = d*j;
         //V[0][j] = 0;
     }
-
-    //#pragma omp parallel for collapse(2)
-    for ( int i = 1; i <= s.length();i++){
-        for( int j = 1; j <= t.length(); j++){
-                int MATCH = V[i-1][j-1] + W(s[i-1], t[j-1]);
+    for ( int i = 1; i <= x.length();i++){
+        for( int j = 1; j <= y.length(); j++){
+                int MATCH = V[i-1][j-1] + W(x[i-1], y[j-1]);
                 int INSERTION = V[i][j-1] + d;
                 int DELETION = V[i-1][j] + d;
-                V[i][j] = std::max(std::max(MATCH, INSERTION), DELETION);
-                
+                V[i][j] = std::max(std::max(MATCH, INSERTION), DELETION); 
         }
     }
-
+    
     // print matrix
     /* for ( int i = 0; i <= s.length(); i ++){
         for( int j= 0; j <= t.length(); j++){
@@ -241,43 +243,201 @@ std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::strin
     std::string alignmentRef = "";
     std::string alignmentSeq = "";
 
-    int i = s.length();
-    int j = t.length();
-    
-   /*  std::cout << "JJJJJJJJJJJJJJJJJJ: " << j << std::endl;
+    int i = x.length();
+    int j = y.length();
 
-    int max = d*i;
-    int temp;
-
-    for (int x = j; j >= 0; j--){
-        if(V[i][j] > max){
-            max = V[i][j];
-            temp = j;
-        }
-    }
-
-    j = temp;
-
-    std::cout << "JJJJJJJJJJJJJJJJJJXXXXXXXX: " << j << std::endl;
-     */
     while (i>0 || j>0){
-        if (i > 0 && j > 0 && V[i][j] == V[i-1][j-1] + W(s[i-1], t[j-1])){
-            alignmentRef = s[i-1] + alignmentRef;
-            alignmentSeq = t[j-1] + alignmentSeq;
+        if (i > 0 && j > 0 && V[i][j] == V[i-1][j-1] + W(x[i-1], y[j-1])){
+            alignmentRef = x[i-1] + alignmentRef;
+            alignmentSeq = y[j-1] + alignmentSeq;
             i -= 1;
             j -= 1;
         }
         else if (i > 0 && V[i][j] == V[i-1][j] + d){
-            alignmentRef = s[i-1] + alignmentRef;
+            alignmentRef = x[i-1] + alignmentRef;
             alignmentSeq = "-" + alignmentSeq;
             i -=1;
         }
         else{
             alignmentRef = "-" + alignmentRef;
-            alignmentSeq = t[j-1] + alignmentSeq;
+            alignmentSeq = y[j-1] + alignmentSeq;
             j -=1;
         } 
     }
+    //std::cout << alignmentSeq;
+    return std::make_pair(alignmentRef, alignmentSeq);
+}
+
+std::vector<int> NWScore(const std::string &x, const std::string &y){
+    
+    //std::cout << "NWScore start with size: " << x.size() << " " << std::endl;
+
+    std::vector<std::vector<int>> score(2, std::vector<int>(y.length() + 1, 0));
+    std::vector<int> lastLine; 
+    int d = -2;
+
+    for (int j = 1; j <= y.length(); j++){
+        score[0][j] = score[0][j-1] + d;
+    }
+
+    for (int i = 1; i <= x.length(); i++){
+        score[1][0] = score[0][0] + d;
+
+        for (int j = 1; j <= y.length(); j++){
+        
+            int scoreSub = score[0][j-1] + W(x[i-1], y[j-1]);
+            int scoreDel = score[0][j] + d;
+            int scoreIns = score[1][j-1] + d;
+            score[1][j] = std::max(std::max(scoreSub, scoreDel), scoreIns);
+        }
+        for ( int j = 0; j <= y.length(); j++){
+            score[0][j] = score[1][j];
+        }
+    }
+    for (int j = 0; j <= y.length(); j++){
+        lastLine.push_back(score[1][j]);
+        //std::cout << j << " " << lastLine[j] << std::endl;
+    }
+    
+
+    //std::cout << "NWScore finish with size: " << lastLine.size() << std::endl;
+
+    return lastLine;
+}
+
+int findArgMax(std::vector<int> first, std::vector<int> second) {
+    std::vector<int> sum;
+
+    for(int i = 0; i < first.size(); i++) {
+        sum.push_back(first[i] + second[i]);
+    }
+
+    int max = sum[0];
+    int argMax = 0;
+    for(int i = 0; i < sum.size(); i++) {
+        if(sum[i] > max) {
+            max = sum[i];
+            argMax = i;
+        }
+    }
+
+    return argMax;
+}
+
+// x = reference, y = sequence
+std::unordered_map <std::string, std::pair<std::string,std::string> > memo;
+
+std::pair<std::string, std::string> hirschberg(std::string &x, std::string &y){
+   // std::cout << x << std::endl;
+   // std::cout << y << std::endl;
+      
+   if (memo.find(x+y) != memo.end()) {
+       return memo.find(x+y)->second;
+   }else if(memo.find(y+x) !=memo.end()){
+        std::pair<std::string, std::string> result = memo.find(y+x)->second;
+        return std::make_pair(result.second, result.first);
+   }
+
+
+    std::string alignmentRef = "";
+    std::string alignmentSeq = "";
+
+    if (x.length() == 0){
+        for (int i = 1; i <= y.length(); i++){
+            alignmentRef = alignmentRef + '-';
+            alignmentSeq = alignmentSeq +  y[i-1];
+        }
+
+       // std::cout << "X duljine 0 " << alignmentRef << " " << alignmentSeq << std::endl;
+    }
+    else if (y.length() == 0){
+        for (int i = 1; i <= x.length(); i++){
+            alignmentRef = alignmentRef + x[i-1];
+            alignmentSeq = alignmentSeq +  '-';
+        }
+        //std::cout << "Z duljine 0 " << alignmentRef << " " << alignmentSeq << std::endl;
+    } 
+    else if (x.length() == 1 || y.length() == 1){
+        std::pair<std::string, std::string> nwPair = needlemanWunsch(x, y); // calling NeedlemanWunsch() 
+        alignmentRef = nwPair.first;
+        alignmentSeq = nwPair.second;
+    }
+          
+    else{
+        int xlen = x.length();
+        int xmid = x.length()/2;
+        int ylen = y.length();
+
+       // std::cout << "xlen "<< xlen << std::endl << "xmid " << xmid << std::endl;
+        //std::cout << "ylen " << ylen << std::endl;
+
+        std::string secondSubstr = x.substr(xmid, xlen);
+        
+        std::vector<int> scoreL = NWScore(x.substr(0, xmid), y);
+        //std::cout << "ScoreL: ";
+      /*  for (int i = 0; i < scoreL.size(); i++){
+            std::cout << scoreL[i] << " ";
+        }
+        std::cout << std::endl;
+*/
+        // Reverse strings
+        std::reverse(secondSubstr.begin(), secondSubstr.end());
+        std::string yRev(y);
+        std::reverse(yRev.begin(), yRev.end());
+       // std::cout << "secondSubstr: " << secondSubstr << " yRev: " << yRev << std::endl;
+        std::vector<int> scoreR = NWScore (secondSubstr, yRev);
+        std::reverse(scoreR.begin(), scoreR.end());
+
+      /*  std::cout << "ScoreR: ";
+        for (int i = 0; i < scoreR.size(); i++){
+            std::cout << scoreR[i] << " ";
+        }
+        std::cout << std::endl;
+*/
+       // std::cout << "R size: " << scoreR.size() << "L size: " << scoreL.size() << std::endl;
+
+        auto size = std::max(scoreR.size(), scoreL.size());
+
+
+
+        scoreR.resize(size);   
+        scoreL.resize(size);
+
+     //   std::cout << "Bok!" << std::endl;
+
+        int ymid = findArgMax(scoreR, scoreL);
+      //  std::cout << std::endl << "yMid: " << ymid << std::endl;
+      
+        std::string xPart1 = x.substr(0, xmid);
+        std::string yPart1 = y.substr(0, ymid);
+        std::string xPart2 = x.substr(xmid, xlen);
+        std::string yPart2 = y.substr(ymid, ylen);
+
+        std::pair<std::string, std::string> firstPair = hirschberg(xPart1, yPart1);
+        std::pair<std::string, std::string> secondPair = hirschberg(xPart2, yPart2);
+
+        alignmentRef = firstPair.first + secondPair.first;
+        alignmentSeq = firstPair.second + secondPair.second;
+    }
+
+    std::pair<std::string, std::string> result = std::make_pair(alignmentRef, alignmentSeq);
+    std::pair<std::string, std::string> result2 = std::make_pair(alignmentSeq, alignmentRef);
+
+    memo.insert(std::pair<std::string, std::pair<std::string, std::string> > (x + y, result));
+    memo.insert(std::pair<std::string, std::pair<std::string, std::string> > (y + x, result2));
+    
+    return result;
+}
+
+// s is ref, t is seq
+std::vector < std::tuple<char, int, char> >  KmerUtil::globalAlignment(std::string &s, std::string &t, int refIndex){
+
+    std::pair <std::string, std::string> alignmentPair = hirschberg(s, t);
+
+    std::cout << "Hirschberg end!" << std::endl;
+
+    std::string alignmentRef = alignmentPair.first;
+    std::string alignmentSeq = alignmentPair.second;
 
     std::vector < std::tuple<char, int, char> > mutations;
     int realRefIndex = 0;
@@ -297,7 +457,7 @@ std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::strin
             else {
                 realRefIndex++;
             }  
-    }
+    } 
 
     //std::cout << alignmentRef << std::endl;
     //std::cout << alignmentSeq << std::endl; 
@@ -306,7 +466,6 @@ std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::strin
     //}
  
     return mutations;
-    //std::cout << alignmentSeq;
 }
 
 
