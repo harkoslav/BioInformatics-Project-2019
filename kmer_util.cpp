@@ -7,7 +7,9 @@
 #include <iostream>
 #include <fstream>
 
-
+/*
+    Helper map used for getting complement value of given nucleotide base.
+*/
 KmerUtil::ComplementMap KmerUtil::complement_map = { 
     { 'A', 'T' },
     { 'C', 'G' },
@@ -15,23 +17,14 @@ KmerUtil::ComplementMap KmerUtil::complement_map = {
     { 'G', 'C' }
 }; 
 
-KmerUtil::BaseToTupleIndex KmerUtil::base_to_index = { 
-    { 'A', 0 },
-    { 'C', 1 },
-    { 'G', 2 },
-    { 'T', 3 },
-    { '-', 4 }
-}; 
+/*
+    Used for calculating max number of occurences of particular mutation (I,X,D) on current index
+    in the resulting map structure used for counting mutations.
 
-KmerUtil::IndexToBase KmerUtil::index_to_base = { 
-    { 0, 'A' },
-    { 1, 'C' },
-    { 2, 'G' },
-    { 3, 'T' },
-    { 4, '-' }
-}; 
-
-
+    map - map which stores A,C,G,T values as keys & map of keys I,X,D with counters as values indicating
+          how many times mutation occured 
+    returns - tuple value (action which happened on the given mutation (I,X,D), nucleotide base, number of occurences) 
+*/
 std::tuple<char,char, int> KmerUtil::get_max_mutation_on_index(std::unordered_map <char, std::unordered_map<char, int>> map) {
     
     int max = -1;
@@ -48,6 +41,8 @@ std::tuple<char,char, int> KmerUtil::get_max_mutation_on_index(std::unordered_ma
     }
     return std::make_tuple(action, base, max);
 }
+
+
 void KmerUtil::print_results_to_csv(std::string ref_string,  std::unordered_map<int, std::unordered_map<char, std::unordered_map<char,int>>> mutations_map, std::ofstream csv_out) {
     //std::ofstream csv_out;
 
@@ -62,21 +57,25 @@ void KmerUtil::print_results_to_csv(std::string ref_string,  std::unordered_map<
     csv_out.close(); 
 }
 
-void KmerUtil::add_mutation_to_result_map(std::vector < std::tuple<char, int, char> > mutations_from_align, 
-    std::unordered_map<int, std::unordered_map<char, std::unordered_map<char,int>>> result_map) {
+/*
+    Adds mutation tuple to the result map.
+    mutations_from_align - mutations found in align algorithm
+    result_map - map in which mutation is added
+*/
+void KmerUtil::add_mutation_to_result_map(std::vector < std::tuple<char, int, char> > &mutations_from_align, 
+    std::unordered_map<int, std::unordered_map<char, std::unordered_map<char,int>>> &result_map) {
     for (auto mutation : mutations_from_align) {
-        
         char I_X_D = std::get<0>(mutation);
         int mutation_index_in_ref = std::get<1>(mutation);
         char base = std::get<2>(mutation);
-
-
         result_map[mutation_index_in_ref][base][I_X_D]++;
-
-        // csv_out << std::get<0>(mutation) << "," << std::get<1>(mutation) << "," << std::get<2>(mutation) << std::endl;
     }
 }
 
+/*
+    Calculates reverse complement of input string.
+    input - input string
+*/
 std::string KmerUtil::to_reverse_complement(std::string input) {
     std::string reverse_comp;
     for (int i = input.size() - 1; i >= 0; i--) {
@@ -85,6 +84,12 @@ std::string KmerUtil::to_reverse_complement(std::string input) {
     return reverse_comp;
 }
 
+/*
+    Calculates minimizers in input string of length k.
+    input - input string
+    k - kmer length
+    returns - found kmer minimizer
+*/
 Kmer KmerUtil::minimizer_in_window(std::string &input, int k) {
     std::string max_str ("ZZZZZZZZZZZZZZZZ");
     Kmer minKmer(max_str, -1);
@@ -101,13 +106,19 @@ Kmer KmerUtil::minimizer_in_window(std::string &input, int k) {
     return minKmer;
 }
 
+/*
+    Calculates minimizers in given reference string using k and w.
+    k - kmer length
+    w - number of kmers from which the minimizer is generated
+    returns - map of key minimizer, and value indicating vector of all indices found in reference string
+*/
 std::unordered_map<std::string, std::vector<int>> KmerUtil::calculate_minimizers(std::string &reference, int k, int w) {
 
     std::unordered_map<std::string, std::vector<int>> kmer_map;
 
     int win_size = w + k - 1;
 
-    for (int i = 0; i <= reference.length() - win_size; i += w) {
+    for (int i = 0; i <= reference.length() - win_size; i++) {
             std::string sub = reference.substr(i, win_size);
             Kmer minimizer = minimizer_in_window(sub, k);
             //std::cout << "  nasao: " << minimizer.str << " i: " << minimizer.index<<  std::endl; 
@@ -127,38 +138,14 @@ std::unordered_map<std::string, std::vector<int>> KmerUtil::calculate_minimizers
    return kmer_map;
 }
 
+/*
+    Find longest incresing subsequence in vector of pairs based on the second value (index in ref string) of that pair.
+    Stores the resulting indices in vector b.
 
-void KmerUtil::LongestIncreasingSubsequence(std::vector<int> &a, std::vector<int> &b)
-{
-	std::vector<int> p(a.size());
-	int u, v;
- 
-	if (a.empty()) return;
- 
-	b.push_back(0);
- 
-	for (size_t i = 1; i < a.size(); i++){
-		if (a[b.back()] < a[i]) {
-			p[i] = b.back();
-			b.push_back(i);
-			continue;
-		}
-   
-		for (u = 0, v = b.size()-1; u < v;) {
-			int c = (u + v) / 2;
-			if (a[b[c]] < a[i]) u=c+1; else v=c;
-		}
- 
-		if (a[i] < a[b[u]]) {
-			if (u > 0) p[i] = b[u-1];
-			b[u] = i;
-		}	
-	}
- 
-	for (u = b.size(), v = b.back(); u--; v = p[v]) b[u] = v;
-}
-
-
+    a - vector of pairs from which the LIS is calculated on second's pair value
+    b - vector indicating longest increasing subsequence of ref indexes
+    returns - true if LIS is found, false if not
+*/
  bool KmerUtil::LongestIncreasingSubsequence(std::vector<std::pair<int, int>> &a, std::vector<int> &b) {
 	std::vector<int> p(a.size());
 	int u, v;
@@ -189,12 +176,25 @@ void KmerUtil::LongestIncreasingSubsequence(std::vector<int> &a, std::vector<int
     return true;
 } 
 
+/*
+    Helper function which gets index of given nucleotide char c
+    used in scoring matrix W.
+    c - nucleotide for which index is calculated
+    returns - index of char c
+*/
 int mapChar(char c){
     if (c == 'A') return 0;
     else if (c == 'C') return 1;
     else if (c == 'G') return 2;
     else if (c == 'T') return 3;
 }
+/*
+    Scoring matrix used for alignment.
+
+    first - row in matrix
+    second - col in matrix
+    returns - score
+*/
 int W(char first, char second){
     int w[4][4] = {
         {4, -1, -1, -1},
@@ -205,11 +205,18 @@ int W(char first, char second){
     return w[mapChar(first)][mapChar(second)];
 }
 
+/*
+    Global alignment function which aligns given strings s & t and returns number of found
+    mutations.
+
+    s - substring in ref string
+    t - substring in sequenced string
+    refIndex - index from which s substring starts in reference string
+    returns - vector of found mutations in tuple format (action, index_in_ref, base)
+*/
 std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::string &s, std::string &t, int refIndex){
 
-    
     std::vector<std::vector<int>> V(s.length()+1, std::vector<int>(t.length()+1, 0));
-
     int d = -2;
     
     for (int i = 1; i <= s.length(); i++){
@@ -220,9 +227,6 @@ std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::strin
         //V[0][j] = 0;
     }
 
-   
-    
-    //#pragma omp for
     for (int i = 1; i <= s.length();i++){
         #pragma omp parallel for
         for(int j = 1; j <= t.length(); j++){
@@ -233,8 +237,6 @@ std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::strin
                 
         }
     }
-
-    
 
     // print matrix
     /* for ( int i = 0; i <= s.length(); i ++){
@@ -296,46 +298,40 @@ std::vector < std::tuple<char, int, char> > KmerUtil::globalAlignment(std::strin
     //}
  
     return mutations;
-    //std::cout << alignmentSeq;
 }
 
+/*
+    Calculates minimizers of sequence string while searching them in the reference string. 
+    Returns longest region found in the tuple format (ref_substr, seq_substr, begin_ref, end_ref), so the
+    sequence string can later be mapped to the reference in order to find mutations.
 
-std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIndexer &refIndexer, std::string &sequence, std::string &reference, int k, int w) {
-//std::pair<std::string, std::string> KmerUtil::find_best_region(KmerIndexer &refIndexer, std::string &sequence, std::string &reference, int k, int w) {
+    refIndexer - used for indexing reference string kmer minimizers
+    sequence - sequence string
+    reference - reference string
+    k - kmer length
+    w - number of kmers from which the minimizer is generated
+    min_gap - minimal allowed gap between minimizers in found region
+    returns - ongest region found in the tuple format (ref_substr, seq_substr, begin_ref, end_ref)
+*/
+std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIndexer &refIndexer, std::string &sequence, std::string &reference, int k, int w, int min_gap) {
 
     std::unordered_map<std::string, std::vector<int>> kmer_map;
     std::vector <std::pair<int, int>> seqi_refi_pairs;
     int win_size = w + k - 1;
 
-    for (int i = 0; i <= sequence.length() - win_size; i += w) {
+    for (int i = 0; i <= sequence.length() - win_size; i++) {
         std::string sub = sequence.substr(i, win_size);
         Kmer minimizer = minimizer_in_window(sub, k);
-        //std::cout << "  nasao seq minimizer: " << minimizer.str << " i: " << i+minimizer.index<<  std::endl; 
         int minimizer_index_in_seq = i + minimizer.index;
         std::vector<int> ref_indices =  refIndexer.get_kmer_indices(minimizer.str);
-
-        //std::cout << "Nasao minimizer " << minimizer.str << " u reference: " << ref_indices.empty() << std::endl;
-        int first_ref_ind;        
+              
         if (seqi_refi_pairs.empty() && !ref_indices.empty()) {
-            
-            //first_ref_ind = ref_indices.front();
-
-            first_ref_ind = ref_indices.back();
-            //seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, first_ref_ind));
-            
             for (auto ref_index: ref_indices) {    
-                    seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, ref_index));
+                seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, ref_index));
             }  
         } else if(!ref_indices.empty()){ 
-            //std::cout << seqi_refi_pairs.back().first << ": " << minimizer_index_in_seq << std::endl;
             int last_inserted_index = seqi_refi_pairs.back().first;
-            
-            //first_ref_ind = ref_indices.front();
-            first_ref_ind = ref_indices.back();
-            if (last_inserted_index != minimizer_index_in_seq) {
-                
-                //seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, first_ref_ind));
-                                
+            if (last_inserted_index != minimizer_index_in_seq) {                  
                   for (auto ref_index: ref_indices) {          
                     seqi_refi_pairs.push_back(std::pair<int, int>(minimizer_index_in_seq, ref_index));
                 }     
@@ -348,35 +344,24 @@ std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIn
         std::cout << "(" << el.first << ", " << el.second << ") ";
     }
     std::cout << std::endl; */
+
     std::vector<int> longest_region_indices;
-    
     bool success = LongestIncreasingSubsequence(seqi_refi_pairs, longest_region_indices);
 
-    
-    
-
-                    //todo test
-
-
+    /* filter duplicated seq_index pairs */
     std::vector<std::pair<int,int>> lsi_filtered;
-    //ili u mapu
     int init = 1;
     int last_pushed;
     for (int i: longest_region_indices) {
-            //std::cout << last_pushed << " " <<  seqi_refi_pairs[i].first << std::endl;
         if (init || last_pushed != seqi_refi_pairs[i].first){
             init = 0;
             lsi_filtered.push_back(seqi_refi_pairs[i]);
             last_pushed = seqi_refi_pairs[i].first;
-            //std::cout << "aaa" <<std::endl;
         }
     }
-
-
     seqi_refi_pairs = lsi_filtered;
     
-    int seq_len = sequence.length();
-    //check if there is too big gap
+    /* check if there is too big gap */
     int max_gap = -1;
     int before_curr = -1;
     for (auto ind: longest_region_indices){
@@ -386,8 +371,8 @@ std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIn
         }
         int curr = seqi_refi_pairs[ind].second;
 
-        if ( curr - before_curr > 15*(w+k-1) ){
-            std::cout << "TOO big gap: " << curr - before_curr << std::endl;
+        if ( curr - before_curr > min_gap*(w+k-1) ){
+            std::cout << "Too big gap, skipping...: " << curr - before_curr << std::endl;
             success = false;
             break;
         }
@@ -398,40 +383,26 @@ std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIn
         return std::make_tuple("x","x",-1, -1);
     }
 
-   
-    /* std::cout << "LSI indices: " << std::endl;
+    /* std::cout << "LIS indices: " << std::endl;
     for (auto ind: longest_region_indices){
         std::cout << "( "  << seqi_refi_pairs[ind].first << ", " << seqi_refi_pairs[ind].second << " )"  << " ";
     }
     std::cout <<std::endl;
- */
-
-    
-    std::ofstream csv_reg_test;
+    */
 
     int begin_ref = seqi_refi_pairs[longest_region_indices.front()].second;
     int end_ref = seqi_refi_pairs[longest_region_indices.back()].second;
     int begin_seq = seqi_refi_pairs[longest_region_indices.front()].first;
     int end_seq = seqi_refi_pairs[longest_region_indices.back()].first;
 
-
     int end_str_ref_index = end_ref + k - 1;
     int end_str_seq_index = end_seq + k - 1;
     std::cout << "Found regions of best match:" << std::endl;
     std::cout << "Refrence str: ( begin_index: "  << begin_ref << ", end_index_start:" << end_str_ref_index << " )"  << std::endl;
     std::cout << "Sequence str: ( begin_index: "  << begin_seq << ", end_index_start:" << end_str_seq_index << " )"  << std::endl;
-
-
-    csv_reg_test.open ("reg.csv");
-    csv_reg_test << "Refrence str: ( begin_index: "  << begin_ref << " end_index:" << end_str_ref_index << " )"  << std::endl;
-    csv_reg_test << "Sequence str: ( begin_index: "  << begin_seq << " end_index:" << end_str_seq_index << " )"  << std::endl;
-     
-    
-    
+   
     std::string ref_substr = reference.substr(begin_ref, end_str_ref_index - begin_ref + 1);
     std::string seq_substr = sequence.substr(begin_seq, end_str_seq_index - begin_seq + 1);
-
-
      
     std::tuple<std::string, std::string, int, int> result (ref_substr, seq_substr, begin_ref, end_str_ref_index);
 

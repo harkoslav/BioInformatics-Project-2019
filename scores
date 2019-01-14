@@ -14,116 +14,59 @@
 0.636734693878 - sve, back, i+=w , cout tres >=11 8 min
 0.672489082969 - sve, back, i+=w , cout tres >=12
 0.675555555555 - sve, back, i+=w , cout tres >=13
+
+
+
+0.684444444444 - sve, back, i+=w , cout tres >=12 gap 15*(k+w-1)
+Align duration avg: 101768628
+Region duration avg: 2947016
+Align duration avg: 126162448
+
+0.684444444444 - sve, back, i++ , cout tres >=12 gap 15*(k+w-1)
+Align duration avg: 126162448
+Region duration avg: 3009107
+Program duration: 132537544
+
+
+
 0.659192825112 - sve, back, i+=W, cout tres >=14
 
 0.621621621622 - sve, niebitno, i+=w, tres>=13 gap 15*(k+w-1) 
 0.650224215247 - sve, niebitno, i+=w, tres>=12 gap 15*(k+w-1)
-
 0.629464285714 - sve, niebitno, i+=w, tres>=8 gap 12*(k+w-1)
-
 0.603448275862 - sve, niebitno, i+=w, tres>=6 gap 11*(k+w-1)
 
 
 
 
-ECOLI
-0.704364125733 - sve,niebitno, i+=W, tres>=12 gap 15*(kw-1)
-I,4868,A,4
-I,6157,C,4
-I,13647,G,4
-I,14531,C,4
-I,14953,T,4
-I,15585,T,4
-I,15607,G,4
-X,16102,T,4
-X,16185,A,5
-X,16348,G,5
-X,16360,T,6
-I,16373,C,6
-I,16637,C,6
-X,16812,A,5
-I,17157,T,4
-X,17630,G,4
-I,17705,C,4
-X,18443,G,5
-X,19041,T,5
-I,19418,C,4
-I,19730,C,4
-I,19816,T,4
-I,20154,A,5
-X,20716,T,5
-I,20861,C,4
-X,21828,T,5
-X,21989,C,4
-I,22258,T,4
-I,22491,C,4
-I,22583,T,5
-I,22685,T,5
-I,23332,A,4
-I,23378,A,5
-X,23468,C,5
-I,23581,G,6
-I,23665,C,4
-X,24276,G,7
-X,25221,A,6
-I,25680,T,4
-I,25821,A,4
-I,25958,G,4
-X,26581,C,5
-X,26646,C,6
-X,26664,C,4
-I,26873,G,4
-X,27049,G,7
-X,27055,T,5
-I,27278,G,4
-X,27332,A,6
-I,27491,C,5
-X,27869,C,6
-X,27945,T,5
-X,28234,G,7
-X,28568,A,5
-I,28577,C,5
-X,28602,T,6
-X,28606,T,6
-I,28688,G,4
-I,28707,C,5
-I,28789,T,6
-X,29048,A,6
-I,29055,G,4
-I,29132,T,4
-I,29192,A,5
-I,29194,T,6
-X,29697,C,7
-I,29962,T,5
-X,30246,A,4
-X,30787,G,7
-I,31074,C,4
-I,31493,T,6
-X,31555,T,6
-X,31663,G,6
-I,31949,T,4
-I,32080,G,7
-X,32149,C,5
-X,32582,A,6
-X,32854,A,4
-X,33186,A,6
-X,33403,C,5
-X,33522,C,4
-X,33823,G,5
-X,33965,A,4
-I,34013,T,4
-X,34934,G,5
-X,35157,C,4
-I,35255,C,4
-X,35268,C,5
-I,35899,G,5
-I,36063,G,4
-X,37000,A,5
-X,37338,G,5
-I,37540,A,4
-I,38866,C,4
-X,39209,G,4
-X,39806,T,4
-I,39862,A,4
-I,40652,T,4
+LAMBDAA RESULTS (i++):
 
+0.674107142857,  13 14
+Align duration avg: 137017970
+Region duration avg: 3092129
+Program duration: 143536681
+
+0.684444444444 - 12 15
+Align duration avg: 126162448
+Region duration avg: 3009107
+Program duration: 132537544
+
+
+
+
+
+
+ECOLI
+0.782854984894 - sve, niebitmo, i++, tres>=11 gap 14*kw-1
+Align duration avg: 94702605
+Region duration avg: 481893308
+-----------------------Program duration: 9489943306
+
+0.704364125733 - sve,niebitno, i+=W, tres>=12 gap 15*(kw-1)
+0.455938131127 - sve, nebitno, i++, tres>=10, gap 10*(kw-1) 3648264948 us
+
+
+0.494785350473 - sve, nebitno, i++, tres>=8*, gap 11*kw-1
+Align duration avg: 704969542
+Region duration avg: 401455874
+-----------------------Program duration: 5560114843
