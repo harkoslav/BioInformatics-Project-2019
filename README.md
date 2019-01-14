@@ -8,7 +8,7 @@ https://www.fer.unizg.hr/predmet/bio
 `./main.o`
 
 
-## Compile Paralel execution
+## Compile Parallel execution
 `g++ -std=c++11 -fopenmp -Wall -I . ./*.cpp -o main.o`
 
 `./main.o`
