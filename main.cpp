@@ -21,29 +21,42 @@ int main(int argc, char *argv[])
     int w;
     int c_treshold;
     int min_gap;
-
-    if (argc >= 3) {
+    int ecoli;
+    if (argc >= 5) {
         std::size_t pos;
         std::string arg = argv[1];
         std::string arg2 = argv[2];
         std::string arg3 = argv[3];
+        std::string arg4 = argv[4];
+        std::string arg5 = argv[5];
         k = std::stoi(arg, &pos);
         w = std::stoi(arg2, &pos);
         c_treshold = std::stoi(arg3, &pos);
+        min_gap = std::stoi(arg4, &pos);
+        ecoli = std::stoi(arg5, &pos);
     } else {
-        k = 5;
-        w = 15;
-        c_treshold = 13;
+        k = 15;
+        w = 5;
+        c_treshold = 12;
         min_gap = 15;
+        ecoli = 0;
     }
+    std::string file = (ecoli) ? "ecoli":"lambda";
+    std::cout << "k: " << k << " w: " << w <<" c_tres: " << c_treshold << " gap: " << min_gap << " file: "<< file << std::endl;
+    std::string sequence_file;
+    std::string reference_file;
 
-    std::cout << "k: " << k << " w: " << w << std::endl;
-    std::string sequence_file ("./input/lambda_simulated_reads.fasta");
-    std::string reference_file ("./input/lambda.fasta"); 
-
-    /* std::string sequence_file ("./input/ecoli_simulated_reads.fasta");
-    std::string reference_file ("./input/ecoli.fasta");
-    */
+    if(ecoli == 1){
+        sequence_file = "./input/ecoli_simulated_reads.fasta";
+        reference_file = "./input/ecoli.fasta";
+    } else {
+       sequence_file = "./input/lambda_simulated_reads.fasta";
+       reference_file = "./input/lambda.fasta"; 
+    }
+    
+/*     std::string sequence_file ("./input/ecoli_simulated_reads.fasta");
+    std::string reference_file ("./input/ecoli.fasta"); */
+    
     std::string reference = FastAReader::read_reference_file(reference_file);
     std::vector<std::string> sequence_list = FastAReader::read_sequence_file(sequence_file);
     /* --------------------------- END OF INPUT --------------------------- */

@@ -41,12 +41,43 @@ Program duration: 132537544
 
 LAMBDAA RESULTS (i++):
 
-0.674107142857,  13 14
+
+0.356807511737 15 5 13 10 0
+Align duration avg: 50851411
+Region duration avg: 2747173
+Program duration: 54737836
+
+1.3GB
+0.589552238806, k15 w15 10 15
+Align duration avg: 106366025
+Region duration avg: 3283259
+Program duration: 112384031
+
+1.2 GB
+0.633064516129, k20 w20 10 15
+Align duration avg: 102627238
+Region duration avg: 12938689
+Program duration: 118502270
+
+Align duration avg: 95500228
+Region duration avg: 14249549
+Program duration: 113270833
+0.633064516129 k20 w20 10 15
+
+
+
+0.589552238806, k15 w15 10 12
+Align duration avg: 107072937
+Region duration avg: 3289960
+Program duration: 113195747
+
+
+0.674107142857,  k15 w5 13 14
 Align duration avg: 137017970
 Region duration avg: 3092129
 Program duration: 143536681
 
-0.684444444444 - 12 15
+0.684444444444 - k15 w5 12 15
 Align duration avg: 126162448
 Region duration avg: 3009107
 Program duration: 132537544
@@ -70,3 +101,9 @@ Region duration avg: 481893308
 Align duration avg: 704969542
 Region duration avg: 401455874
 -----------------------Program duration: 5560114843
+
+
+
+
+
+./main.o 15 5 12 15 0

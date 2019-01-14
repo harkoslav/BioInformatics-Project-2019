@@ -362,7 +362,7 @@ std::tuple<std::string, std::string, int, int> KmerUtil::find_best_region(KmerIn
     seqi_refi_pairs = lsi_filtered;
     
     /* check if there is too big gap */
-    int max_gap = -1;
+  
     int before_curr = -1;
     for (auto ind: longest_region_indices){
         if (before_curr < 0) {
