@@ -4,7 +4,7 @@ University of Zagreb, Faculty of Electrical Engineering and Computing
 Bioinformatics project for course [Bioinformatika](https://www.fer.unizg.hr/predmet/bio) 
 
 
-## Compile & run:
+## Compile & run
 `g++ -std=c++11 -Wall -I . ./*.cpp -o main.o `
 
 `./main.o`
