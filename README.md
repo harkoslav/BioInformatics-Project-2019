@@ -25,7 +25,7 @@ min_gap 15
 ecoli = 0 (0 for lambda or 1 for ecoli)
 ```
 
-Example tu run from terminal for the same default input:
+Example to run from terminal for the same default input:
 `./main.o 15 5 12 15 0`
 
 
