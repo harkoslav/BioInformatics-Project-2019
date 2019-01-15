@@ -5,13 +5,13 @@ Bioinformatics project for course [Bioinformatika](https://www.fer.unizg.hr/pred
 
 
 ## Compile & run
-`g++ -std=c++11 -Wall -I . ./*.cpp -o main.o `
+`g++ -std=c++11 -Wall -O3 -I . ./*.cpp -o main.o `
 
 `./main.o`
 
 
 ## Compile Parallel execution
-`g++ -std=c++11 -fopenmp -Wall -I . ./*.cpp -o main.o`
+`g++ -std=c++11 -fopenmp -O3 -Wall -I . ./*.cpp -o main.o`
 
 `./main.o`
 
